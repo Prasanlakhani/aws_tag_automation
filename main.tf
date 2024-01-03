@@ -3,7 +3,7 @@ terraform {
     google = {
       source  = "hashicorp/aws"
       version = ">= 4.5"
-	  region = var.region_name  # Change this to your desired AWS region
+	  #region = var.region_name  # Change this to your desired AWS region
 
 
     }
