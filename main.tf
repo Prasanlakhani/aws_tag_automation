@@ -12,6 +12,7 @@ terraform {
 }
 
 
+
 # Define the S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state_bucket" {
   bucket = var.s3_tfstate_name  # Replace with your desired bucket name
@@ -90,7 +91,7 @@ resource "aws_iam_policy" "lambda_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Action   = ec2:DescribeInstances","ec2:CreateTags","ec2:DeleteTags"],
+        Action   = [ec2:DescribeInstances","ec2:CreateTags","ec2:DeleteTags"],
         Effect   = "Allow",
         Resource = "*",
       },
@@ -136,3 +137,4 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
 #  target_id = "lambda_target"
 #  arn       = aws_lambda_function.example_lambda.arn
 #}
+
