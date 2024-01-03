@@ -3,7 +3,7 @@ terraform {
     google = {
       source  = "hashicorp/aws"
       version = ">= 4.5"
-	  #region = var.region_name  # Change this to your desired AWS region
+	  region = var.region_name  # Change this to your desired AWS region
 
 
     }
@@ -13,22 +13,24 @@ terraform {
 
 
 
-# Define the S3 bucket for Terraform state
-resource "aws_s3_bucket" "terraform_state_bucket" {
-  bucket = var.s3_tfstate_name  # Replace with your desired bucket name
-  acl    = "private"
-}
+## Define the S3 bucket for Terraform state
+#resource "aws_s3_bucket" "terraform_state_bucket" {
+#  bucket = var.s3_tfstate_name  # Replace with your desired bucket name
+#  acl    = "private"
+#}
+#
+## Configure the backend to use S3
+#terraform {
+#  backend "s3" {
+#    bucket         = aws_s3_bucket.terraform_state_bucket.bucket
+#    key            = "terraform.tfstate"
+#    region         = var.region_name  
+#    #encrypt        = true
+#    #dynamodb_table = "terraform_lock"  # Optional: Use DynamoDB for state locking
+#  }
+#}
 
-# Configure the backend to use S3
-terraform {
-  backend "s3" {
-    bucket         = aws_s3_bucket.terraform_state_bucket.bucket
-    key            = "terraform.tfstate"
-    region         = var.region_name  
-    #encrypt        = true
-    #dynamodb_table = "terraform_lock"  # Optional: Use DynamoDB for state locking
-  }
-}
+
 # S3 bucket
 resource "aws_s3_bucket" "prasans3" {
   bucket = var.s3_name
@@ -130,6 +132,3 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
     resources   = [aws_s3_bucket.prasans3.arn],
   })
 }
-
-
-
