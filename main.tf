@@ -131,10 +131,5 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
   })
 }
 
-## Target for the EventBridge rule - Lambda function
-#resource "aws_cloudwatch_event_target" "lambda_target" {
-#  rule      = aws_cloudwatch_event_rule.s3_event_rule.name
-#  target_id = "lambda_target"
-#  arn       = aws_lambda_function.example_lambda.arn
-#}
+
 
