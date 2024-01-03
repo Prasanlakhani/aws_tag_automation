@@ -1,6 +1,17 @@
-provider "aws" {
-  region = var.region_name  # Change this to your desired AWS region
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/aws"
+      version = ">= 4.5"
+	  region = var.region_name  # Change this to your desired AWS region
+
+
+    }
+  }
+
 }
+
+
 
 # Define the S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state_bucket" {
@@ -27,8 +38,7 @@ resource "aws_s3_bucket" "prasans3" {
 # Lambda function
 resource "aws_lambda_function" "example_lambda" {
   filename      = "./code/main.py"  # Update with the actual path to your Lambda function code
-  #function_name = "tagging_lamda"
-  function_name = "tagging_lamda_terraform"
+  function_name = "tagging_lamda"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"  # Update with the runtime your Lambda function uses
@@ -127,4 +137,3 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
 #  target_id = "lambda_target"
 #  arn       = aws_lambda_function.example_lambda.arn
 #}
-
