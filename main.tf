@@ -12,7 +12,6 @@ terraform {
 }
 
 
-
 # Define the S3 bucket for Terraform state
 resource "aws_s3_bucket" "terraform_state_bucket" {
   bucket = var.s3_tfstate_name  # Replace with your desired bucket name
