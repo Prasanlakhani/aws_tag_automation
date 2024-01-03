@@ -12,6 +12,6 @@ variable "s3_tfstate_name" {
 
 variable "s3_name" {
   type = string
-  default     = tagautomations3bucket"
+  default     = "tagautomations3bucket"
   description = "The ID of the project where this VPC will be created"
 }
