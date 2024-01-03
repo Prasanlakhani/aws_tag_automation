@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "prasans3" {
 # Lambda function
 resource "aws_lambda_function" "example_lambda" {
   filename      = "./code/main.py"  # Update with the actual path to your Lambda function code
-  function_name = "tagging_lamda"
+  function_name = "tagging_lamda_tf_test"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"  # Update with the runtime your Lambda function uses
@@ -28,7 +28,7 @@ resource "aws_lambda_function" "example_lambda" {
 
 # IAM Role for Lambda function
 resource "aws_iam_role" "lambda_exec" {
-  name = "lambda_exec_role"
+  name = "lambda_exec_role_tf_test"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -53,7 +53,7 @@ resource "aws_iam_role" "lambda_exec" {
 
 # IAM Policy for Lambda function
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "lambda_policy"
+  name        = "lambda_policy_tf_test"
   description = "Policy for Lambda function"
 
   policy = jsonencode({
@@ -92,7 +92,7 @@ resource "aws_iam_role_policy_attachment" "lambda_exec_attachment" {
 
 # EventBridge rule to trigger Lambda function on S3 object creation
 resource "aws_cloudwatch_event_rule" "s3_event_rule" {
-  name        = "s3_event_rule"
+  name        = "s3_event_rule_tf_test"
   description = "Event rule for S3 bucket events"
 
   event_pattern = jsonencode({
