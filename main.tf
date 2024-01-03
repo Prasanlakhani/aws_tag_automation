@@ -27,7 +27,8 @@ resource "aws_s3_bucket" "prasans3" {
 # Lambda function
 resource "aws_lambda_function" "example_lambda" {
   filename      = "./code/main.py"  # Update with the actual path to your Lambda function code
-  function_name = "tagging_lamda"
+  #function_name = "tagging_lamda"
+  function_name = "tagging_lamda_terraform"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"  # Update with the runtime your Lambda function uses
