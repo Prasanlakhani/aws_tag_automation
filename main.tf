@@ -27,7 +27,7 @@ resource "aws_s3_bucket" "prasans3" {
 # Lambda function
 resource "aws_lambda_function" "example_lambda" {
   filename      = "./code/main.py"  # Update with the actual path to your Lambda function code
-  function_name = "tag_automation_lambda_function"
+  function_name = "tagging_lamda"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"  # Update with the runtime your Lambda function uses
@@ -127,3 +127,90 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
 #  arn       = aws_lambda_function.example_lambda.arn
 #}
 
+
+
+##########################################
+
+# IAM Policy for Lambda function
+resource "aws_iam_policy" "lambda_policy" {
+  name        = "lambda_policy"
+  description = "Policy for Lambda function"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "logs:CreateLogGroup",
+        Effect   = "Allow",
+        Resource = "*",
+      },
+      {
+        Action   = ["logs:CreateLogStream", "logs:PutLogEvents"],
+        Effect   = "Allow",
+        Resource = aws_iam_role.lambda_exec.arn,
+      },
+      {
+        Action   = "events:PutRule",
+        Effect   = "Allow",
+        Resource = "*",
+      },
+      {
+        Action   = "events:PutTargets",
+        Effect   = "Allow",
+        Resource = "*",
+      },
+      {
+        Action   = "s3:GetObject",
+        Effect   = "Allow",
+        Resource = aws_s3_bucket.prasans3.arn,
+      },
+    ],
+  })
+}
+
+
+
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:ListBucket",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::prasans3/*",  // Replace "prasans3" with your S3 bucket name
+        "arn:aws:s3:::prasans3"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+		"scheduler:GetSchedule",
+		"scheduler:UpdateSchedule",
+		"scheduler:CreateSchedule",
+		"scheduler:ListSchedules",
+		"scheduler:DeleteSchedule"
+		
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:CreateTags",
+        "ec2:DeleteTags"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
+
+
+##############################################
