@@ -10,17 +10,16 @@ terraform {
 # S3 bucket
 resource "aws_s3_bucket" "prasans3" {
   bucket = var.s3_name
-  #acl    = "private"
 }
 
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
-  filename      = "./code/main.zip"  # Update with the actual path to your Lambda function code
+  filename      = "./code/main.zip"
   function_name = "tagging_lamda_tf_test"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
-  runtime       = "python3.8"  # Update with the runtime your Lambda function uses
-  timeout       = 300  # Timeout set to 5 minutes (300 seconds)
+  runtime       = "python3.8"
+  timeout       = 300
   source_code_hash = filebase64("./code/main.zip")
 
   depends_on = [aws_s3_bucket.prasans3]
@@ -44,7 +43,7 @@ resource "aws_iam_role" "lambda_exec" {
         Action = "sts:AssumeRole",
         Effect = "Allow",
         Principal = {
-          Service = "scheduler.amazonaws.com",
+          Service = "events.amazonaws.com",  # Corrected service name for EventBridge
         },
       },
     ],
@@ -66,11 +65,9 @@ resource "aws_iam_policy" "lambda_policy" {
       },
       {
         Action   = [
-          "scheduler:GetSchedule",
-          "scheduler:UpdateSchedule",
-          "scheduler:CreateSchedule",
-          "scheduler:ListSchedules",
-          "scheduler:DeleteSchedule",
+          "events:GetRule",  # Adjusted permissions for EventBridge
+          "events:PutTargets",
+          "events:PutRule",
         ],
         Effect   = "Allow",
         Resource = "*",
@@ -98,7 +95,7 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
   event_pattern = jsonencode({
     source      = ["aws.s3"],
     detail      = {
-      eventName = ["PutObject"],  # You can customize this based on the S3 events you want to trigger the Lambda function
+      eventName = ["PutObject"],
     },
     resources   = [aws_s3_bucket.prasans3.arn],
   })
@@ -109,6 +106,6 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
   rule      = aws_cloudwatch_event_rule.s3_event_rule.name
   target_id = "lambda_target"
   arn       = aws_lambda_function.tag_lambda.arn
-  
-    depends_on = [aws_lambda_function.tag_lambda]
+
+  depends_on = [aws_lambda_function.tag_lambda]
 }
