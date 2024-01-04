@@ -10,6 +10,7 @@ terraform {
 # S3 bucket
 resource "aws_s3_bucket" "prasans3" {
   bucket = var.s3_name
+  #acl    = "private"
 }
 
 # Lambda function
@@ -21,9 +22,19 @@ resource "aws_lambda_function" "tag_lambda" {
   runtime       = "python3.8"
   timeout       = 300
   source_code_hash = filebase64("./code/main.zip")
+  
+  # S3 bucket trigger configuration
+  event_source {
+    s3 {
+      bucket         = aws_s3_bucket.prasans3.id
+      events         = ["s3:ObjectCreated:Put"]
+      filter_suffix  = ".json"  # Only trigger on objects with this suffix
+    }
+  }
 
   depends_on = [aws_s3_bucket.prasans3]
 }
+
 
 # IAM Role for Lambda function
 resource "aws_iam_role" "lambda_exec" {
@@ -43,7 +54,7 @@ resource "aws_iam_role" "lambda_exec" {
         Action = "sts:AssumeRole",
         Effect = "Allow",
         Principal = {
-          Service = "events.amazonaws.com",  # Corrected service name for EventBridge
+          Service = "scheduler.amazonaws.com",
         },
       },
     ],
@@ -65,9 +76,11 @@ resource "aws_iam_policy" "lambda_policy" {
       },
       {
         Action   = [
-          "events:GetRule",  # Adjusted permissions for EventBridge
-          "events:PutTargets",
-          "events:PutRule",
+          "scheduler:GetSchedule",
+          "scheduler:UpdateSchedule",
+          "scheduler:CreateSchedule",
+          "scheduler:ListSchedules",
+          "scheduler:DeleteSchedule",
         ],
         Effect   = "Allow",
         Resource = "*",
@@ -87,25 +100,25 @@ resource "aws_iam_role_policy_attachment" "lambda_exec_attachment" {
   role       = aws_iam_role.lambda_exec.name
 }
 
-# EventBridge rule to trigger Lambda function on S3 object creation
-resource "aws_cloudwatch_event_rule" "s3_event_rule" {
-  name        = "s3_event_rule_tf_test"
-  description = "Event rule for S3 bucket events"
+## EventBridge rule to trigger Lambda function on S3 object creation
+#resource "aws_cloudwatch_event_rule" "s3_event_rule" {
+#  name        = "s3_event_rule_tf_test"
+#  description = "Event rule for S3 bucket events"
+#
+#  event_pattern = jsonencode({
+#    source      = ["aws.s3"],
+#    detail      = {
+#      eventName = ["PutObject"],  # You can customize this based on the S3 events you want to trigger the Lambda function
+#    },
+#    resources   = [aws_s3_bucket.prasans3.arn],
+#  })
+#}
 
-  event_pattern = jsonencode({
-    source      = ["aws.s3"],
-    detail      = {
-      eventName = ["PutObject"],
-    },
-    resources   = [aws_s3_bucket.prasans3.arn],
-  })
-}
-
-# Target for the EventBridge rule - Lambda function
-resource "aws_cloudwatch_event_target" "lambda_target" {
-  rule      = aws_cloudwatch_event_rule.s3_event_rule.name
-  target_id = "lambda_target"
-  arn       = aws_lambda_function.tag_lambda.arn
-
-  depends_on = [aws_lambda_function.tag_lambda]
-}
+## Target for the EventBridge rule - Lambda function
+#resource "aws_cloudwatch_event_target" "lambda_target" {
+#  rule      = aws_cloudwatchevent_rule.s3_event_rule.name
+#  target_id = "lambda_target"
+#  arn       = aws_lambda_function.tag_lambda.arn
+#  
+#    depends_on = [aws_lambda_function.tag_lambda]
+#}
