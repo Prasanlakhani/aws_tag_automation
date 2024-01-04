@@ -29,10 +29,10 @@ resource "aws_lambda_function" "tag_lambda" {
   timeout       = 300
   source_code_hash = data.archive_file.lambda.output_base64sha256
   
-    #environment {
-    #variables = {
-    #  s3storage = var.s3_name
-    #}
+    environment {
+    variables = {
+      s3storage = var.s3_name
+    }
   
 #  # S3 bucket trigger configuration
 #  event_source {
@@ -52,7 +52,9 @@ resource "aws_s3_bucket_notification" "aws-lambda-trigger" {
     lambda_function_arn = aws_lambda_function.tag_lambda.arn
     events              = ["s3:ObjectCreated:Put"]
 	filter_suffix = ".json"
-
+	
+  depends_on = [aws_s3_bucket.prasans3]
+  #depends_on = [aws_lambda_function.tag_lambda]
   }
 }
 
