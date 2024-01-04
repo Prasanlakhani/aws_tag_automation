@@ -15,13 +15,13 @@ resource "aws_s3_bucket" "prasans3" {
 
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
-  filename      = "./code/main.py"  # Update with the actual path to your Lambda function code
+  filename      = "./code/main.zip"  # Update with the actual path to your Lambda function code
   function_name = "tagging_lamda"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"  # Update with the runtime your Lambda function uses
   timeout       = 300  # Timeout set to 5 minutes (300 seconds)
-  source_code_hash = filebase64("./code/main.py")
+  source_code_hash = filebase64("./code/main.zip")
 
   depends_on = [aws_s3_bucket.prasans3]
 }
