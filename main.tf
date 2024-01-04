@@ -27,7 +27,7 @@ resource "aws_lambda_function" "tag_lambda" {
   handler       = "lambda_function.handler"
   runtime       = "python3.8"
   timeout       = 300
-  source_code_hash = data.archive_file.lambda.output_base64sha256
+  #source_code_hash = data.archive_file.lambda.output_base64sha256
   
     environment {
     variables = {
