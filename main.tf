@@ -10,13 +10,13 @@ terraform {
 # S3 bucket
 resource "aws_s3_bucket" "prasans3" {
   bucket = var.s3_name
-  acl    = "private"
+  #acl    = "private"
 }
 
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
   filename      = "./code/main.zip"  # Update with the actual path to your Lambda function code
-  function_name = "tagging_lamda"
+  function_name = "tagging_lamda_tf_test"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"  # Update with the runtime your Lambda function uses
@@ -53,7 +53,7 @@ resource "aws_iam_role" "lambda_exec" {
 
 # IAM Policy for Lambda function
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "lambda_policy"
+  name        = "lambda_policy_tf_test"
   description = "Policy for Lambda function"
 
   policy = jsonencode({
