@@ -49,13 +49,24 @@ resource "aws_lambda_function" "tag_lambda" {
 
 resource "aws_s3_bucket_notification" "aws-lambda-trigger" {
   bucket = aws_s3_bucket.prasans3.id
+  
   lambda_function {
     lambda_function_arn = aws_lambda_function.tag_lambda.arn
     events              = ["s3:ObjectCreated:Put"]
 	filter_suffix = ".json"
 	
-  depends_on = [aws_s3_bucket.prasans3, aws_lambda_function.tag_lambda]
+  #depends_on = [aws_s3_bucket.prasans3, aws_lambda_function.tag_lambda]
   }
+}
+
+resource "aws_lambda_permission" "test" {
+  statement_id  = "AllowS3Invoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.tag_lambda.arn
+  principal = "s3.amazonaws.com"
+  source_arn = aws_s3_bucket.prasans3.arn
+  
+  depends_on = [aws_lambda_function.tag_lambda, aws_s3_bucket_notification.aws-lambda-trigger]
 }
 
 
