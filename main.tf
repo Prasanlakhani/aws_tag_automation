@@ -33,6 +33,7 @@ resource "aws_lambda_function" "tag_lambda" {
     variables = {
       s3storage = var.s3_name
     }
+	}
   
 #  # S3 bucket trigger configuration
 #  event_source {
