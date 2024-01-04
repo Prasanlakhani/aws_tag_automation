@@ -110,5 +110,5 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
   target_id = "lambda_target"
   arn       = aws_lambda_function.tag_lambda.arn
   
-    depends_on = [aws_lambda_function.tag_lambda.arn]
+    depends_on = [aws_lambda_function.tag_lambda]
 }
