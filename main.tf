@@ -13,15 +13,15 @@ resource "aws_s3_bucket" "prasans3" {
   #acl    = "private"
 }
 
-data "archive_file" "lambda" {
-  type        = "zip"
-  source_file = "./code/main.py"
-  output_path = "main.zip"
-}
+#data "archive_file" "lambda" {
+#  type        = "zip"
+#  source_file = "./code/main.py"
+#  output_path = "main.zip"
+#}
 
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
-  filename      = "main.zip"
+  filename      = "./code/main.zip"
   function_name = "tagging_lamda_tf_test"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
