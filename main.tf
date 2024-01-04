@@ -16,18 +16,19 @@ resource "aws_s3_bucket" "prasans3" {
 #data "archive_file" "lambda" {
 #  type        = "zip"
 #  source_file = "./code/main.py"
-#  output_path = "main.zip"
+#  output_path = "./code/main.zip"
 #}
 
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
-  filename      = "./code/main.zip"
+  #filename      = "./code/main.zip"
   function_name = "tagging_lamda_tf_test"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"
   timeout       = 300
   #source_code_hash = data.archive_file.lambda.output_base64sha256
+  source_code_hash = filebase64("./code/main.py")
   
     environment {
     variables = {
