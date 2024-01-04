@@ -13,26 +13,47 @@ resource "aws_s3_bucket" "prasans3" {
   #acl    = "private"
 }
 
+data "archive_file" "lambda" {
+  type        = "zip"
+  source_file = "./code/main.py"
+  output_path = "main.zip"
+}
+
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
-  filename      = "./code/main.zip"
+  filename      = "main.zip"
   function_name = "tagging_lamda_tf_test"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"
   timeout       = 300
-  source_code_hash = filebase64("./code/main.zip")
+  source_code_hash = data.archive_file.lambda.output_base64sha256
   
-  # S3 bucket trigger configuration
-  event_source {
-    s3 {
-      bucket         = aws_s3_bucket.prasans3.id
-      events         = ["s3:ObjectCreated:Put"]
-      filter_suffix  = ".json"  # Only trigger on objects with this suffix
-    }
-  }
+    #environment {
+    #variables = {
+    #  s3storage = var.s3_name
+    #}
+  
+#  # S3 bucket trigger configuration
+#  event_source {
+#    s3 {
+#      bucket         = aws_s3_bucket.prasans3.id
+#      events         = ["s3:ObjectCreated:Put"]
+#      filter_suffix  = ".json"  # Only trigger on objects with this suffix
+#    }
+#  }
 
   depends_on = [aws_s3_bucket.prasans3]
+}
+
+resource "aws_s3_bucket_notification" "aws-lambda-trigger" {
+  bucket = aws_s3_bucket.prasans3.id
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.tag_lambda.arn
+    events              = ["s3:ObjectCreated:Put"]
+	filter_suffix = ".json"
+
+  }
 }
 
 
