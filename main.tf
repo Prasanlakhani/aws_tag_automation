@@ -14,21 +14,21 @@ resource "aws_s3_bucket" "prasans3" {
 }
 
 # Lambda function
-resource "aws_lambda_function" "example_lambda" {
-  filename      = "./code/main.zip"  # Update with the actual path to your Lambda function code
-  function_name = "tagging_lamda_tf_test"
+resource "aws_lambda_function" "tag_lambda" {
+  filename      = "./code/main.py"  # Update with the actual path to your Lambda function code
+  function_name = "tagging_lamda"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"  # Update with the runtime your Lambda function uses
   timeout       = 300  # Timeout set to 5 minutes (300 seconds)
-  source_code_hash = filebase64("./code/main.zip")
+  source_code_hash = filebase64("./code/main.py")
 
   depends_on = [aws_s3_bucket.prasans3]
 }
 
 # IAM Role for Lambda function
 resource "aws_iam_role" "lambda_exec" {
-  name = "lambda_exec_role_tf_test"
+  name = "lambda_exec_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -53,7 +53,7 @@ resource "aws_iam_role" "lambda_exec" {
 
 # IAM Policy for Lambda function
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "lambda_policy_tf_test"
+  name        = "lambda_policy"
   description = "Policy for Lambda function"
 
   policy = jsonencode({
@@ -102,4 +102,11 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
     },
     resources   = [aws_s3_bucket.prasans3.arn],
   })
+}
+
+# Target for the EventBridge rule - Lambda function
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule      = aws_cloudwatch_event_rule.s3_event_rule.name
+  target_id = "lambda_target"
+  arn       = aws_lambda_function.tag_lambda.arn
 }
