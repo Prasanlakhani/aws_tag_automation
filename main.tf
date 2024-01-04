@@ -55,7 +55,7 @@ resource "aws_s3_bucket_notification" "aws-lambda-trigger" {
     events              = ["s3:ObjectCreated:Put"]
 	filter_suffix = ".json"
 	
-  #depends_on = [aws_s3_bucket.prasans3, aws_lambda_function.tag_lambda]
+  depends_on = [aws_s3_bucket.prasans3, aws_lambda_function.tag_lambda]
   }
 }
 
