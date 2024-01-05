@@ -27,7 +27,7 @@ LIMIT_TIME = 2   # Time Limit in Minutes
 
 #Define Variables
 flag_counter=0
-lambda_name = 'Tag_test'
+
 
 #Generate Unique Number
 UID_Name=secrets.token_hex(3)
@@ -36,30 +36,38 @@ print(f"*******************************")
 print(f"LAMDA function Started : {UID_Name} : Version : {version} ")
 
 
-bucket_name = 'tag-test-prasan'
-
+#Get Environment variables stored in lambda
+#bucket_name = 'tag-test-prasan'
+bucket_name = os.environ.get('s3storage')
+lambda_name = os.environ.get('lambdaname')
+region_name = os.environ.get('regionname')
+iam_name = os.environ.get('iamrole')
+acc_name = os.environ.get('account')
+     
+      
+      
+# Printing the variables stored in Lambda
 print(f"bucket_name :  {bucket_name}")
+print(f"lambda_name :  {lambda_name}")
+print(f"region_name :  {region_name}")
+print(f"iam_name :  {iam_name}")
+print(f"acc_name :  {acc_name}")
+
 
 s3_objects = s3_client.list_objects(Bucket=bucket_name)
-
 print(f"s3_objects :  {s3_objects}")
-
 keys = [obj['Key'] for obj in s3_objects['Contents']]
-
 print(f"Number of Files :  {keys}")
-
-
-
-
-
 
 
 
 def lambda_handler(event, context):
 
+
     for file_key_raw in keys:
         print(f"Current Working File :  {file_key_raw}")
-
+              
+#
         # Skip non-JSON files if needed
         if not file_key_raw.endswith('.json'):
             continue
@@ -83,7 +91,6 @@ def createSchedular (state, event_datetime,  UTC_event_datetime) :
     
     print(f"*******************************")
     print(f"{state} : Local Time : {event_datetimeLocal} : UTC Time : {event_datetimeUTC} ")
-
     print(f"*******************************")    
     
     response_list_schedules = sch_client.list_schedules(State='ENABLED')
@@ -100,24 +107,22 @@ def createSchedular (state, event_datetime,  UTC_event_datetime) :
         return return_flag
 
     else : 
+    
         print(f"Creating Schedule with Name : {rule_name}")
-
+        
         try: 
             response = sch_client.create_schedule(
+                #Description='Test Phase',
                 FlexibleTimeWindow={
                     'Mode': 'OFF'
                 },
-                
                 Name=rule_name,
                 ScheduleExpression=f"at({event_datetimeUTC})",
-                #ScheduleExpressionTimezone='UTC+0' #f"'UTC{timezone}'",                     # Need to design in variable
                 State='ENABLED',
                 Target={
-                    'RoleArn': "arn:aws:iam::819408870801:role/Event-Lamda-Ec2",
-                    'Arn': 'arn:aws:lambda:ap-south-1:819408870801:function:tagging_lamda' 
-
+                    'RoleArn': f'arn:aws:iam::{acc_name}:role/{iam_name}',
+                    'Arn': f'arn:aws:lambda:{region_name}:{acc_name}:function:{lambda_name}'
                 }
-        
             )
         
             print(f"Scheduled : {rule_name} created successfully.")
@@ -126,7 +131,7 @@ def createSchedular (state, event_datetime,  UTC_event_datetime) :
             return return_flag
         except Exception as e:
             print(f"Error: {str(e)}")
-    
+
  
 def HostScheduledaction (hosts_ina, file_key1, data1,  event_status, event_datetime1, tag_key1, tag_indicator, flag_monitoring, STR_TIME_NOW31 ) : 
 
@@ -135,8 +140,11 @@ def HostScheduledaction (hosts_ina, file_key1, data1,  event_status, event_datet
 
     CTIME = event_datetime1.strftime("%Y, %m, %d, %H, %M, %S")
 
+
     print(f"STR_TIME_NOW31 : {STR_TIME_NOW31}")
+
     PTIME =  event_datetime1 - STR_TIME_NOW31
+
     STIME = PTIME.total_seconds()
     FTIME = (int(STIME/60))
     print(f"Time Remaining : {FTIME}")
@@ -157,7 +165,7 @@ def HostScheduledaction (hosts_ina, file_key1, data1,  event_status, event_datet
 
             print(f"instance_id : {instance_id}")
     
-                # Find the monitoring tag and toggle its value
+
             for tag in current_tags:
                 print(f"tag : {tag}")
                 if tag['Key'] == tag_key1 :
@@ -180,7 +188,8 @@ def HostScheduledaction (hosts_ina, file_key1, data1,  event_status, event_datet
 
     return
 
-    
+
+   
 def Precheck (file_key1, data1, hosts_in, event_datetime_start1, event_datetime_stop1, event_datetime_cleaup1, UTC_event_datetime_start1, UTC_event_datetime_stop1, UTC_event_datetime_cleanup1, tag_key1, STR_TIME_NOW31 ) : 
     flag_precheck = 0
 
@@ -237,7 +246,7 @@ def Precheck (file_key1, data1, hosts_in, event_datetime_start1, event_datetime_
         else : 
             flag_precheck = 2
             
-                        # Delete
+
     if flag_precheck == 2 :
         Error (file_key1, data1,'ATTENTION : The Scheduled start date/time is before current time ')
     else :
@@ -256,7 +265,6 @@ def Precheck (file_key1, data1, hosts_in, event_datetime_start1, event_datetime_
     if flag_precheck == 0 :
         Flag_Status = flag_queued
         print(f"Flag_Status : {Flag_Status}")
-        
         
         flag_queued_state = createSchedular ("Start", event_datetime_start1, UTC_event_datetime_start1)
         flag_queued_state = createSchedular ("Stop", event_datetime_stop1, UTC_event_datetime_stop1)
@@ -290,10 +298,7 @@ def cleanup (state, event_datetime, Json_UID1) :
     print(f"rule_name : {rule_name}")
     
     if any(schedule.get('Name') == rule_name for schedule in schedules):
-    
-        
         response = sch_client.delete_schedule(Name=rule_name)
-        
         print(f"Scheduled : {rule_name} deleted successfully.")
         return_flag = 0
         
@@ -301,7 +306,6 @@ def cleanup (state, event_datetime, Json_UID1) :
         print(f"Scheduled job doesnt exist : {rule_name}")
         return_flag = 1
         
-    
     return return_flag
     
     
@@ -324,8 +328,7 @@ def Main_function (file_key) :
 #       # Read the JSON file content
         response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
         data = json.loads(response['Body'].read().decode('utf-8'))
-#       
-#       
+
         # Process the JSON data as needed
         print(f"Processing : {file_key} : It load : {data}")
         
@@ -384,10 +387,9 @@ def Main_function (file_key) :
         STR_TIME_NOW = UTC_Time.strftime("%Y%m%d%H%M%S")
         STR_TIME_NOW2 = UTC_Time.strftime("%Y-%m-%d %H:%M:%S") 
         STR_TIME_NOW3 = datetime.strptime(STR_TIME_NOW2, "%Y-%m-%d %H:%M:%S")
-        
 
         print(f"UTC : {timezone} : {UTC_Time}")
-
+  
 
 
         try:
@@ -404,7 +406,6 @@ def Main_function (file_key) :
                 print(f"Flag_Status : {Flag_Status}")
                 HostScheduledaction (hosts, file_key, data, Flag_Status, event_datetime_start, tag_key , tag_value_stop, flag_monitoring_off, STR_TIME_NOW3)
             
-            #*******************************************************************************************************************************
             # During maintenece Window Finish
             if Flag_Status == flag_monitoring_off :
             
