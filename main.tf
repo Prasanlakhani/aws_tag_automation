@@ -32,7 +32,7 @@ resource "aws_lambda_function" "tag_lambda" {
   #filename      = "./code/main.py"
   function_name = var.lambda_name
   role          = aws_iam_role.lambda_exec.arn
-  handler       = "lambda_function.handler"
+  handler       = "main.lambda_handler"
   runtime       = "python3.8"
   timeout       = 300
   #source_code_hash = data.archive_file.lambda.output_base64sha256
