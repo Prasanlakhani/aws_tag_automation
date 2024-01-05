@@ -28,7 +28,7 @@ Tag Automation is a tool designed to automate tagging operations based on JSON c
 
 ```
 
-Getting Started
+# Getting Started
 To use Tag Automation, follow these steps:
 
 Define Variables: Declare variables in the variables.tf file, which will be used for Lambda function execution. Variables include:
@@ -46,7 +46,7 @@ Scheduler Creation: The Lambda function creates schedulers based on the JSON con
 
 Cleanup Schedulers: Cleanup schedulers are created to delete all scheduled events one hour after the specified stop time.
 
-Variables in Lambda Function
+# Variables in Lambda Function
 s3storage: S3 bucket to store the JSON file.
 lambdaname: Lambda function name.
 iamrole: IAM role name.
