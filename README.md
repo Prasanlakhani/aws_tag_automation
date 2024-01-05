@@ -26,6 +26,8 @@ Tag Automation is a tool designed to automate tagging operations based on JSON c
   "Hosts": ["Test"]
 }
 
+```
+
 Getting Started
 To use Tag Automation, follow these steps:
 
