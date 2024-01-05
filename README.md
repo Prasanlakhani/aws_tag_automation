@@ -31,20 +31,21 @@ Tag Automation is a tool designed to automate tagging operations based on JSON c
 ## Getting Started
 To use Tag Automation, follow these steps:
 
-Define Variables: Declare variables in the variables.tf file, which will be used for Lambda function execution. Variables include:
+- Define Variables: Declare variables in the variables.tf file, which will be used for Lambda function execution. Variables include:
 
-- s3storage: S3 bucket to store the JSON file. #Should be Unique
-- lambdaname: Lambda function name.
-- iamrole: IAM role name.
-- regionname: AWS region for deployment.
-- account: AWS account ID.
-Upload JSON Configuration: Upload the JSON configuration file to the specified S3 bucket.
+ - s3storage: S3 bucket to store the JSON file. #Should be Unique
+ - lambdaname: Lambda function name.
+ - iamrole: IAM role name.
+ - regionname: AWS region for deployment.
+ - account: AWS account ID.
+   
+- Upload JSON Configuration: Upload the JSON configuration file to the specified S3 bucket.
 
-Trigger Lambda Function: Lambda function is triggered automatically by S3 upload.
+- Trigger Lambda Function: Lambda function is triggered automatically by S3 upload.
 
-Scheduler Creation: The Lambda function creates schedulers based on the JSON configuration.
+- Scheduler Creation: The Lambda function creates schedulers based on the JSON configuration.
 
-Cleanup Schedulers: Cleanup schedulers are created to delete all scheduled events one hour after the specified stop time.
+- Cleanup Schedulers: Cleanup schedulers are created to delete all scheduled events one hour after the specified stop time.
 
 ## Variables in Lambda Function which needs to be declared if deploying manually
 - s3storage: S3 bucket to store the JSON file.
