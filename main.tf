@@ -9,11 +9,10 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 
-output "aws_account_id" {
-  value = data.aws_caller_identity.current.account_id
-}
+#output "aws_account_id" {
+#  value = data.aws_caller_identity.current.account_id
+#}
 
-	  iamrole = var.policy_name
 
 # S3 bucket
 resource "aws_s3_bucket" "prasans3" {
@@ -29,8 +28,8 @@ data "archive_file" "lambda" {
 
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
-  #filename      = "./code/main.zip"
-  filename      = "./code/main.py"
+  filename      = "./code/main.zip"
+  #filename      = "./code/main.py"
   function_name = var.lambda_name
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
