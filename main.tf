@@ -7,44 +7,47 @@ terraform {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
+output "aws_account_id" {
+  value = data.aws_caller_identity.current.account_id
+}
+
+	  iamrole = var.policy_name
+
 # S3 bucket
 resource "aws_s3_bucket" "prasans3" {
   bucket = var.s3_name
   #acl    = "private"
 }
 
-#data "archive_file" "lambda" {
-#  type        = "zip"
-#  source_file = "./code/main.py"
-#  output_path = "./code/main.zip"
-#}
+data "archive_file" "lambda" {
+  type        = "zip"
+  source_file = "./code/main.py"
+  output_path = "./code/main.zip"
+}
 
 # Lambda function
 resource "aws_lambda_function" "tag_lambda" {
-  filename      = "./code/main.zip"
-  function_name = "tagging_lamda_tf_test"
+  #filename      = "./code/main.zip"
+  filename      = "./code/main.py"
+  function_name = var.lambda_name
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.handler"
   runtime       = "python3.8"
   timeout       = 300
   #source_code_hash = data.archive_file.lambda.output_base64sha256
-  source_code_hash = filebase64("./code/main.zip")
+  #source_code_hash = filebase64("./code/main.zip")
   
     environment {
     variables = {
       s3storage = var.s3_name
+	  lambdaname = var.lambda_name
+	  iamrole = var.role_name
+	  account = data.aws_caller_identity.current.account_id
+	  regionname = var.region_name
     }
 	}
-  
-#  # S3 bucket trigger configuration
-#  event_source {
-#    s3 {
-#      bucket         = aws_s3_bucket.prasans3.id
-#      events         = ["s3:ObjectCreated:Put"]
-#      filter_suffix  = ".json"  # Only trigger on objects with this suffix
-#    }
-#  }
-
   depends_on = [aws_s3_bucket.prasans3]
 }
 
@@ -73,7 +76,7 @@ resource "aws_lambda_permission" "test" {
 
 # IAM Role for Lambda function
 resource "aws_iam_role" "lambda_exec" {
-  name = "lambda_exec_role"
+  name = var.role_name
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -98,7 +101,7 @@ resource "aws_iam_role" "lambda_exec" {
 
 # IAM Policy for Lambda function
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "lambda_policy_tf_test"
+  name        =  var.policy_name
   description = "Policy for Lambda function"
 
   policy = jsonencode({
@@ -121,6 +124,17 @@ resource "aws_iam_policy" "lambda_policy" {
         Resource = "*",
       },
       {
+        Action   = [
+          "lambda:InvokeFunction",
+          "logs:CreateLogGroup",
+          "logs:PutLogEvents",
+          "logs:CreateLogStream",
+          "iam:PassRole",
+        ],
+        Effect   = "Allow",
+        Resource = "*",
+      },
+      {
         Action   = ["s3:GetObject", "s3:PutObject", "s3:ListBucket", "s3:DeleteObject"],
         Effect   = "Allow",
         Resource = [aws_s3_bucket.prasans3.arn, "${aws_s3_bucket.prasans3.arn}/*"],
@@ -128,6 +142,7 @@ resource "aws_iam_policy" "lambda_policy" {
     ],
   })
 }
+
 
 # Attach Lambda execution role policy
 resource "aws_iam_role_policy_attachment" "lambda_exec_attachment" {
