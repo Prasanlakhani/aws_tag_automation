@@ -33,11 +33,11 @@ To use Tag Automation, follow these steps:
 
 - Define Variables: Declare variables in the variables.tf file, which will be used for Lambda function execution. Variables include:
 
- - s3storage: S3 bucket to store the JSON file. #Should be Unique
- - lambdaname: Lambda function name.
- - iamrole: IAM role name.
- - regionname: AWS region for deployment.
- - account: AWS account ID.
+  - s3storage: S3 bucket to store the JSON file. #Should be Unique
+  - lambdaname: Lambda function name.
+  - iamrole: IAM role name.
+  - regionname: AWS region for deployment.
+  - account: AWS account ID.
    
 - Upload JSON Configuration: Upload the JSON configuration file to the specified S3 bucket.
 
