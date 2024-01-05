@@ -6,7 +6,7 @@ variable "region_name" {
 
 variable "s3_name" {
   type = string
-  default     = "tagautomations3bucket_test"
+  default     = "tagautomations3buckettest"
   description = "S3 bucket name, where the .json file will be stored"
 }
 
